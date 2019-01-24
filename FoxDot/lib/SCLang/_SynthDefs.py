@@ -147,7 +147,7 @@ with SynthDef("scratch") as scratch:
 with SynthDef("klank") as klank:
     klank.sus = klank.sus * 1.5
     klank.osc = Klank.ar([[1,2,3,4],[1,1,1,1],[2,2,2,2]], ClipNoise.ar(0.0005).dup, klank.freq)
-    if SC3_PLUGINS:
+    if SC3_PLUGINS or True:
         klank.osc = Decimator.ar(klank.osc, bits=klank.rate - 1)
     klank.env = Env.env(klank.sus*2)
 
@@ -353,7 +353,7 @@ with SynthDef("star") as synth:
     synth.osc  = synth.osc * XLine.ar(synth.amp, synth.amp/10000, synth.sus * 3, doneAction=2) * Line.ar(0.01, 0.5, 0.07)
 star = synth
 
-if SC3_PLUGINS:
+if SC3_PLUGINS or True:
 
     piano = SynthDef("piano")
     piano.amp = piano.amp * 0.7
@@ -376,6 +376,18 @@ pasha.add()
 
 ambi = FileSynthDef("ambi")
 ambi.add()
+
+rhodes = FileSynthDef("rhodes")
+rhodes.add()
+
+acid309 = FileSynthDef("acid309")
+acid309.add()
+
+cs80lead = FileSynthDef("cs80lead")
+cs80lead.add()
+
+bass8 = FileSynthDef("bass8")
+bass8.add()
 
 space = FileSynthDef("space")
 space.add()

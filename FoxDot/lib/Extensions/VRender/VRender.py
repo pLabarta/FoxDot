@@ -7,7 +7,7 @@ from .Composer import compose
 from .VoiceSpecificator import generateVoiceSpecification
 from .Sinsy import download
 
-def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale,sex):
+def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale,sex,local):
 
 	print("Running voice renderization")
 
@@ -17,11 +17,13 @@ def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale,sex):
 
 	generateVoiceSpecification(lyrics,tempo,VOICE_XML_ORIGINAL,VOICE_XML_PROCESSED)
 
-	urlfileName = os.popen("curl -X POST -F 'SPKR_LANG=english' -F 'SPKR=4' -F 'SYNALPHA=0.55' -F 'VIBPOWER=1' -F 'F0SHIFT=0' -F  'SYNSRC=@" + VOICE_XML_PROCESSED +"' http://sinsy.sp.nitech.ac.jp/index.php | grep 'lf0'").read()
-	if sex == "male":
-		urlfileName = os.popen("curl -X POST -F 'SPKR_LANG=english' -F 'SPKR=5' -F 'SYNALPHA=0.55' -F 'VIBPOWER=1' -F 'F0SHIFT=0' -F  'SYNSRC=@" + VOICE_XML_PROCESSED +"' http://sinsy.sp.nitech.ac.jp/index.php | grep 'lf0'").read()
+	if not local:
+		if sex == "male":
+			urlfileName = os.popen("curl -X POST -F 'SPKR_LANG=english' -F 'SPKR=5' -F 'SYNALPHA=0.55' -F 'VIBPOWER=1' -F 'F0SHIFT=0' -F  'SYNSRC=@" + VOICE_XML_PROCESSED +"' http://sinsy.sp.nitech.ac.jp/index.php | grep 'lf0'").read()
+		else:
+			urlfileName = os.popen("curl -X POST -F 'SPKR_LANG=english' -F 'SPKR=4' -F 'SYNALPHA=0.55' -F 'VIBPOWER=1' -F 'F0SHIFT=0' -F  'SYNSRC=@" + VOICE_XML_PROCESSED +"' http://sinsy.sp.nitech.ac.jp/index.php | grep 'lf0'").read()
 
-	download(urlfileName,LAST_VOICE_WAV)
+		download(urlfileName,LAST_VOICE_WAV)
 
 	os.system("cp " + LAST_VOICE_WAV + " " + WAVS_ROOT + outputName + ".wav")
 
