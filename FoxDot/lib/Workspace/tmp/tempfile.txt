@@ -1,14 +1,35 @@
 from .Extensions.VRender import vrender
 
-vrender([0,1,2,3], lyrics="oo ", dur=[1,1,1,1])
-
+vrender([4,3,2,1,5,3,2,4,0,0],dur=[1,1,2])
 
 a = Samples.getBufferFromSymbol('v1')
 
-print(int(a))
+print(v1.buf)
 
-print(int(v1.buf))
+Samples.free(int(v1.buf))
 
-v1 >> loop('v1',P[4:8],dur=1)
+
+print(v1.buf)
 
 print(Root.default)
+
+p2.stop()
+
+v1 >> loop('v1',P[4:16],dur=var([1,4],dur=8),amp=4)
+
+p2 >> sawbass([0,5,2,4],dur=var([4,4],dur=4))
+
+m1 >> quin(PWalk(2),dur=PDur(5,2),amp=1.5)
+
+p3 >> play("x-o-",dur=1)
+
+p4 >> 
+
+p1.stop()
+
+
+
+
+p2.stop()wa
+
+vrender([0,2,0,4])

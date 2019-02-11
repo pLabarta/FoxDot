@@ -194,6 +194,8 @@ class SCLangServerManager(ServerManager):
         self.client = OSCClientWrapper()
         self.client.connect( (self.addr, self.port) )
 
+        self.myOSC = OSCClient()
+        self.myOSC.connect( ("127.0.0.1", 12345) )
         # Assign a valid OSC Client
         self.forward = None
 
@@ -273,6 +275,9 @@ class SCLangServerManager(ServerManager):
         else:
         
             self.client.send( osc_message )
+
+            self.myOSC.send( osc_message )
+
         
         # If we are sending other messages as well
         
