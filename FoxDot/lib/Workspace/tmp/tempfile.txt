@@ -1,196 +1,38 @@
-from .Extensions.Voice import voice
 from .Extensions.VRender import vrender
 
-print(SynthDefs)
+from .Extensions.VRender import voice
 
-d1 >> sawbass([4,3,0,4],dur=[8,8,4,4],amp=1.5)
 
-d2 >> orient([0,1,0,2],dur=PSum(4,4))
+vrender([4,3,2,1,5,3,2,4,0,0],dur=[1,1,2])
 
-d2 >> orient([5,4,2,5,0,2,4,2,2],dur=PSum(4,6))
-
-ll >> sawbass (var([0,4,5,3],dur=4),dur=4,amp=2)
-
-m3 >> piano(ll.pitch+var([(0,4)]),dur=[4],amp=1.2)
-
-m3.stop()
-
-v3 >> loop('v2',P[6], dur=1,amp=7,rate=1,formant=0,mix=0,room=0)
-
-d1 >> play('x-o-')
-
-d2.stop()
-
-d2 >> play('KO')
-
-v3 >> loop('v1',P[4:12], dur=1,amp=8,formant=4,mix=0.8,room=0.8)
-
-
-
-
-v1.stop()
-
-
-d2 >> play('o ')
-
-d1.stop()
-
-d1 >> play('W',dur=1,amp=1)
-
-d1 >> play('1')
-
-d1.stop()
-
-
-d2.stop()
-
-ll >> pluck (var([0,5,3,4],dur=4),dur=1)
-
-ll >> pluck (P[0,5,3,4],dur=2, delay=var([0,2],0.5))
-
-v1 >> play('wwww',pshift=[0,2,4,3a],dur=0.5)
-
-v1 >> play('w w w ww',pshift=[0,2,0,2,5,3,4,0],dur=0.5)
-
-lyrics = "one two three is this is a song hello"
-notes = PWalk(10)[:16]
-dur = PSum(len(notes),20)
-
-Clock.bpm = 120
-Scale.default = Scale.major
-Root.default.set("C")
-
-v2 >> play('x-o-',pshift=[0])
-v1 >> play('K ',pshift=[0])
-
-
-b1 >> piano(rep([0,4,2,6]),dur=4,amp=1.5,oct=2)
-
-b2 >> piano(b1.pitch + var([(0,2,4)]),dur=1,amp=1.5)
-
-
-notes=[5,4,2]
-dur=[2,1,1]
-
-lyrics= "you good morning"
-
-vrender(notes,lyrics=lyrics,dur=dur,filename='v1')
-
-Samples.free(int(v3.buf))
-
-
-print(Scale.default)
-
-print(notes)
-
-v1.solo()
-
-v1.stop()
-
-v2 >> loop('v2',P[4:1212], dur=1,amp=4)
-
-v2.stop()
-
-v2 >> loop('v1',P[0:4], dur=1,amp=var([4,0],[4,0]),pshift=[0])
-
-v2.stop() 
-
-v3 >> loop('v1',P[5:6], dur=1,amp=3,room=0.9,mix=0.9)
-
-v2 >> acid309([0,5,4,2,3],dur=1)
-
-v2.stop()
-
-v2.stop()
-
-rep = lambda lista: sum(map(lambda x: [x]*1,lista),[])
-
-d1 >> play('R',dur=PSum(7,4),pshift=[0,2,0,5,3,2,0])
-
-b3 >> piano(b1.pitch + PWalk(1),dur=0.5,oct=5)
-
-b1.stop()
-
-b3.stop()
-
-m1.stop()
-
-v2.stop()
-
-m1.solo(0)
-
-
-m1 >> pads([0,4,0,2],amp=1.5,dur=[1,3])
-m1.solo(0)
-
-m1 >> pads([0,5,4,2],amp=1.5,dur=2)
-
-m1 >> pads([5,2,0,5,4,0],amp=1.5,dur=[])
-
-d1.solo()
-
-d1 >> play('xoxo',amp=10,dur=1)
-
-d1 >> play('xoxo',amp=10,dur=1)
-
-m1 >> arpy([0],amp=1.5,dur=[])
-
-
-
-m1.stop()
-
-m1 >> ambi([4,0,6,2],amp=1.5,dur=[1,3])
-
-m2.stop()
-
-m2 >> quin(m1.pitch+PWalk(1),dur=0.5,amp=3)
-
-m2 >> ambi((0)+var([4,0,2,0],dur=[4]),dur=0.5,amp=1.5,oct=7)
-
-m2.stop()
-
-v1.stop()
-
-m1 >> piano([0,0,0,4,4],amp=1.5,dur=PSum(5,4))
-
-m1 >> piano([4,2,0,4,0],amp=1.5,dur=PSum(5,4))
-
-m2.stop()
-
-m1.solo()
-
-m1 >> nylon([4,2,5,0],dur=1,amp=1.5)
-
-Scale.default = Scale.major
-
-
-b1.stop()
-
-
-m1 >> ambi([0,5,6,5],dur=[4],amp=1.5)
-
-m1 >> nylon([0,2,5,4,0,2,6],dur=PSum(7,4),amp=1.5)
-
-m1 >> nylon(rep([4,0,2,0]),dur=PSum(7,4),amp=1.5)
-
-b2.solo()
-
-m1.stop()
-
-v1.stop()
-
-p1 >> pluck(0)
-
-voice('v54',lyrics="hola",dur=[1,1,1,1,1,1,1,1],notes=[0,1,2,3,4,5,6,7,8])
-
-print(Samples._buffers[7])
+a = Samples.getBufferFromSymbol('v1')
 
 print(v1.buf)
 
 Samples.free(int(v1.buf))
 
-v1 >> loop('v53',dur=P[3:4])
 
-v2 >> loop('v54',dur=P[1:2])
+print(v1.buf)
 
-v1 >> cs80lead([0,4],dur=1,amp=0.1)
+print(Root.default)
+
+p2.stop()
+
+v1 >> loop('v1',P[4:16],dur=var([1,4],dur=8),amp=4)
+
+p2 >> sawbass([0,5,2,4],dur=var([4,4],dur=4))
+
+m1 >> quin(PWalk(2),dur=PDur(5,2),amp=1.5)
+
+p3 >> play("x-o-",dur=1)
+
+p4 >> 
+
+p1.stop()
+
+
+
+
+p2.stop()wa
+
+vrender([0,2,0,4])
