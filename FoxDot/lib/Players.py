@@ -125,6 +125,7 @@
 from __future__ import absolute_import, division, print_function
 
 import itertools
+from functools import partial
 
 from os.path import dirname
 from random import shuffle, choice
@@ -175,7 +176,10 @@ class EmptyPlayer(object):
         except AttributeError:
             self.__class__ = Player
             self.__init__(self.name)
-            return self.__getattribute__(name)
+            try:
+                return self.__getattribute__(name)
+            except AttributeError:
+                return self.__getattr__(name) # use getattr to make sure we return player key
 
 
 class Player(Repeatable):
@@ -292,6 +296,7 @@ class Player(Repeatable):
         self.envelope    = None
         self.line_number = None
         self.whitespace  = None
+        self.do_bang     = False
         self.bang_kwargs = {}
 
         # Keeps track of which note to play etc
@@ -567,6 +572,18 @@ class Player(Repeatable):
             setattr(self, key, value)
 
             reset.append(key)
+
+        # Set SynthDef defaults
+
+        if self.synthdef in SynthDefs:
+
+            synth = SynthDefs[self.synthdef]
+            
+            for key in ("atk", "decay", "rel"):
+
+                setattr(self, key, synth.defaults[key])
+
+                reset.append(key)
 
         # Any other attribute that might have been used - set to 0
 
@@ -891,8 +908,6 @@ class Player(Repeatable):
     def stutter(self, amount=None, _beat_=None, **kwargs):
         """ Plays the current note n-1 times. You can specify keywords. """
 
-        # TODO // schedule the stuttered events in the clock instead of timestamping an OSCBundle
-
         timestamp = self.get_timestamp(_beat_)
         
         # Get the current values (this might be called between events)
@@ -909,10 +924,12 @@ class Player(Repeatable):
         if self.metro.solo == self and n > 1:
 
             new_event = {}
-        
+
             attributes = self.attr.copy()
+        
+            attr_keys = set(list(self.attr.keys()) + list(kwargs.keys()))
             
-            for key in attributes:
+            for key in attr_keys:
 
                 if key in kwargs:
 
@@ -921,8 +938,6 @@ class Player(Repeatable):
                 elif len(attributes[key]) > 0:
 
                     new_event[key] = self.now(key, ahead)
-
-            # new_event.update(kwargs)
 
             new_event = self.unduplicate_durs(new_event)
 
@@ -1169,8 +1184,6 @@ class Player(Repeatable):
                 max_val = l
 
         return max_val
-
-        #return max(sizes) if len(sizes) else 0
 
     def number_attr(self, attr):
         """ Returns true if the attribute should be a number """
@@ -1482,9 +1495,15 @@ class Player(Repeatable):
 
         timestamp = timestamp if timestamp is not None else self.queue_block.time
 
+        # self.do_bang = False
+
         for i in range(self.get_event_length(**kwargs)):
 
             self.send_osc_message(self.event, i, timestamp=timestamp, verbose=verbose, **kwargs)
+
+        # if self.do_bang:
+
+        #     self.bang()
 
         return
 
@@ -1493,11 +1512,14 @@ class Player(Repeatable):
 
         packet = {}
 
+        event=event.copy()
+        event.update(kwargs)
+
         for key, value in event.items():
 
             # If we can index a value, trigger a new OSC message to send OSC messages for each
 
-            value = kwargs.get(key, value)
+            # value = kwargs.get(key, value)
 
             if isinstance(value, PGroup):
 
@@ -1505,7 +1527,7 @@ class Player(Repeatable):
 
                 for new_key, new_value in event.items():
 
-                    new_value = kwargs.get(new_key, new_value)
+                    # new_value = kwargs.get(new_key, new_value)
 
                     if isinstance(new_value, PGroup):
 
@@ -1547,7 +1569,7 @@ class Player(Repeatable):
 
         # Do any calculations e.g. frequency
 
-        message = self.new_message_header(packet)
+        message = self.new_message_header(packet, **kwargs)
 
         # Only send if amp > 0 etc
 
@@ -1564,6 +1586,8 @@ class Player(Repeatable):
             # We can set a condition to only send messages
 
             self.queue_block.osc_messages.append(compiled_msg)
+
+            # self.do_bang = True
 
         return
 

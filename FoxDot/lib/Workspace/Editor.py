@@ -45,6 +45,7 @@ from distutils.version import LooseVersion as VersionNumber
 import webbrowser
 import os
 import re
+import socket
 
 # Code execution
 from ..Code import execute
@@ -66,6 +67,7 @@ class workspace:
         CodeClass.namespace['Player'].widget = self
 
         self.version = this_version = CodeClass.namespace['__version__']
+
         pypi_version = get_pypi_version()
 
         def check_versions():
@@ -200,6 +202,8 @@ class workspace:
         ctrl = "Command" if SYSTEM == MAC_OS else "Control"
         alt = "Option" if SYSTEM == MAC_OS else "Alt"
 
+        self.text.bind("<<Modified>>",      self.on_text_modified)
+
         self.text.bind("<Return>",          self.newline)
         self.text.bind("<BackSpace>",       self.backspace)
         self.text.bind("<Delete>",          self.delete)
@@ -226,6 +230,7 @@ class workspace:
         self.text.bind("<{}-Shift-Left>".format(ctrl),      self.select_word_left)
 
         self.text.bind("<Alt_L>",                           lambda event: "break")
+        self.text.bind("<Alt-n>",                           lambda event: "break") # Fixes a MacOS tilde bug.
 
         self.text.bind("<{}-a>".format(ctrl),               self.select_all)
         self.text.bind("<{}-d>".format(ctrl),               self.duplicate_line)
@@ -378,6 +383,10 @@ class workspace:
 
                 self.text_as_string = self.get_all()
 
+            # Execute startup file
+
+            return execute.load_startup_file()
+
         # Check online if a new version if available
 
         self.root.after(90, check_versions)
@@ -451,7 +460,7 @@ class workspace:
 
             index = self.text.index(INSERT)
 
-            self.text.insert(index, event.char)
+            self.text.insert(index, event.char) # should modified be called?
 
             self.text.edit_separator()
 
@@ -481,7 +490,7 @@ class workspace:
         try:
 
             execute( self.text.get(a, b) )
-            execute.update_line_numbers(self.text, a, b)
+            # execute.update_line_numbers(self.text, a, b)
 
         except:
 
@@ -552,7 +561,7 @@ class workspace:
         try:
 
             execute( self.text.get( a , b ) )
-            execute.update_line_numbers(self.text, a, b)
+            # execute.update_line_numbers(self.text, a, b)
 
         except:
 
@@ -586,7 +595,7 @@ class workspace:
     def undo(self, event=None):
         try:
             self.text.edit_undo()
-            self.update_all()
+            # self.update_all()
         except TclError:
             pass
              
@@ -595,7 +604,7 @@ class workspace:
     def redo(self, event=None):
         try:
             self.text.edit_redo()
-            self.update_all()
+            # self.update_all()
         except TclError:
             pass
         return "break"
@@ -850,7 +859,7 @@ class workspace:
 
         # Update player line numbers
 
-        execute.update_line_numbers(self.text)
+        # execute.update_line_numbers(self.text)
 
         whitespace = get_tabspace(line) # amount of whitespace to add
 
@@ -973,7 +982,7 @@ class workspace:
 
             # Update player line numbers
 
-            execute.update_line_numbers(self.text)
+            # execute.update_line_numbers(self.text)
 
             return "break"
 
@@ -995,7 +1004,7 @@ class workspace:
 
             # Update player line numbers
 
-            execute.update_line_numbers(self.text, start="%d.0" % (line-1), remove=int(line!=1))
+            # execute.update_line_numbers(self.text, start="%d.0" % (line-1), remove=int(line!=1))
 
             self.text.delete(index(line-1, END), insert)
 
@@ -1027,7 +1036,7 @@ class workspace:
             
         self.update(event)
 
-        execute.update_line_numbers(self.text)
+        # execute.update_line_numbers(self.text)
 
         return "break"
 
@@ -1107,7 +1116,7 @@ class workspace:
 
         self.update(event)
 
-        execute.update_line_numbers(self.text)
+        # execute.update_line_numbers(self.text)
 
         return
 
@@ -1121,8 +1130,6 @@ class workspace:
             self.text.delete(start, end)
 
         self.update(event)
-
-        execute.update_line_numbers(self.text)
 
         return
         
@@ -1309,19 +1316,37 @@ class workspace:
 
     """
 
+    def on_text_modified(self, event):
+
+        self.text.modifying = not self.text.modifying
+
+        if self.text.modifying:
+
+            # Get number of lines added / removed
+
+            old_length, new_length = self.text.lines, self.text.get_num_lines()
+            
+            dif = new_length - old_length
+
+            # Get end index of the operation
+
+            row, col = index(self.text.index(INSERT))
+
+            if dif >= 0:
+
+                for x in range(row - dif, row + 1):
+
+                    self.colour_line(x)
+            
+            self.text.edit_modified(False)
+        
+        return "break"
+
     def update(self, event=None, insert=INSERT):
         """ Updates the the colours of the IDE """
-
         # Move the window to view the current line
 
         self.text.see(INSERT)
-
-        # 1. Get the contents of the current line
-
-        cur = self.text.index(insert)
-        line, column = index(cur)
-
-        self.colour_line(line)
 
         self.update_prompt()
 
@@ -1352,7 +1377,9 @@ class workspace:
 
             for tag_name in self.text.tag_names():
 
-                self.text.tag_remove(tag_name, start_of_line, end_of_line)
+                if tag_name != "tag_open_brackets":
+
+                    self.text.tag_remove(tag_name, start_of_line, end_of_line)
 
             # Re-apply tags
 

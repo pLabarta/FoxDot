@@ -2,11 +2,19 @@ from __future__ import absolute_import, print_function
 
 import os
 
-from .Constants import *
 from .Composer import compose
 from .VoiceSpecificator import generateVoiceSpecification
 
-def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale):
+def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale,sex,foxdot_root):
+
+	# Constants
+	FILES_ROOT = os.path.realpath(foxdot_root + "/lib/Extensions/VRender/tmp/")
+	LAST_MIDI = FILES_ROOT + "/last_midi_generated_by_vrender.mid"
+	VOICE_XML_ORIGINAL=FILES_ROOT + "/last_voice.musicxml"
+	VOICE_XML_PROCESSED=FILES_ROOT+"/last_voice.xml"
+
+	WAVS_ROOT = os.path.realpath(foxdot_root + "/snd/_loop_/")
+	LAST_VOICE_WAV = WAVS_ROOT + "/last_voice_generated.wav"
 
 	compose(notes,durations,scale,LAST_MIDI,VOICE_XML_ORIGINAL)
 
@@ -18,7 +26,7 @@ def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale):
 
 	os.system("rm -f " + WAVS_ROOT + outputName + ".wav")
 
-	os.system("cp " + LAST_VOICE_WAV + " " + WAVS_ROOT + outputName + ".wav")
+	os.system("cp " + LAST_VOICE_WAV + " " + WAVS_ROOT + "/" + outputName + ".wav")
 
 def tokenize(text):
 	textSyllables = cleanText(text)

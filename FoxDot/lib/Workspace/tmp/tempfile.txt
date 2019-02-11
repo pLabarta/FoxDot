@@ -1,16 +1,12 @@
+from .Extensions.Voice import voice
 from .Extensions.VRender import vrender
 
-from .Extensions.VRender import voice
+vrender([4,3,2,1,5,3,2,4,0,0],dur=[1,1,2],lyrics="chau")
 
-
-vrender([4,3,2,1,5,3,2,4,0,0],dur=[1,1,2])
-
-a = Samples.getBufferFromSymbol('v1')
-
-print(v1.buf)
+voice([4,3,2,1,5,3,2,4,0,0],dur=[1,1,2],lyrics="la")
 
 Samples.free(int(v1.buf))
-
+v1 >> loop('v1',P[0:12],dur=1,amp=2)
 
 print(v1.buf)
 
@@ -18,13 +14,17 @@ print(Root.default)
 
 p2.stop()
 
-v1 >> loop('v1',P[4:16],dur=var([1,4],dur=8),amp=4)
+Samples.free(Samples.getBufferFromSymbol('v1'))
 
-p2 >> sawbass([0,5,2,4],dur=var([4,4],dur=4))
+
+p2 >> sawbass([0,0,2,0,2,2,2],dur=PSum(7,4))#var([4,4],dur=4))
+
+p3 >> play("ko",dur=1)
 
 m1 >> quin(PWalk(2),dur=PDur(5,2),amp=1.5)
 
-p3 >> play("x-o-",dur=1)
+m1.stop()
+
 
 p4 >> 
 

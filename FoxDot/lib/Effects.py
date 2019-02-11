@@ -262,6 +262,10 @@ fx = FxList.new("slidefrom", "slideFrom", {"slidefrom": 0, "sus": 1, "slidedelay
 fx.add("osc = osc * EnvGen.ar(Env([slidefrom + 1, slidefrom + 1, 1], [sus*slidedelay, sus*(1-slidedelay)]))")
 fx.save()
 
+fx = FxList.new("glide", "glissando", {"glide": 0, "glide_delay": 0.5, "sus": 1}, order=0)
+fx.add("osc = osc * EnvGen.ar(Env([1, 1, (1.059463**glide)], [sus*glide_delay, sus*(1-glide_delay)]))")
+fx.save()
+
 fx = FxList.new("bend", "pitchBend", {"bend": 0, "sus": 1, "benddelay": 0}, order=0)
 fx.add("osc = osc * EnvGen.ar(Env([1, 1, 1 + bend, 1], [sus * benddelay, (sus*(1-benddelay)/2), (sus*(1-benddelay)/2)]))")
 fx.save()
@@ -303,8 +307,8 @@ fx.save()
 
 fx = FxList.new('swell','filterSwell', {'swell': 0, 'sus': 1, 'hpr': 1}, order=2)
 fx.add_var("env")
-fx.add("env = EnvGen.kr(Env([0,1,0], times:[(sus*0.125), (sus*0.25)], curve:4))")
-fx.add('osc = RHPF.ar(osc, env * swell, hpr)')
+fx.add("env = EnvGen.kr(Env([0,1,0], times:[(sus*0.25), (sus*0.25)], curve:\\sin))")
+fx.add('osc = RHPF.ar(osc, env * swell * 2000, hpr)')
 fx.save()
 
 fx = FxList.new("bpf", "bandPassFilter", {"bpf": 0, "bpr": 1, "bpnoise": 0, "sus": 1}, order=2)

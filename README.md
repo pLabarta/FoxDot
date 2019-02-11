@@ -4,6 +4,15 @@ FoxDot - Live Coding with Python v0.7
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
 ### v0.7 fixes and updates
+- Added startup file that loads on boot. Found in `path/to/FoxDot/lib/Custom/startup.py`. To use another startup file, you can run FoxDot with a `--startup` flag like so:
+
+```bash
+$ python -m FoxDot --startup path/to/my_startup.py
+```
+
+- Fix `MidiIn` missing Synth bug
+- Improved clock timing. If the user is not using a `var` for the tempo, it will be far more accurate and synchronising with other FoxDot instances will be less likely to drift out of time. Also added the function to sync with instances of [EspGrid](https://github.com/d0kt0r0/EspGrid) by simply using `Clock.sync_to_espgrid()` (experimental).
+- Added `Go()` function to run FoxDot code from within normal Python programs.
 - Added `inf` variable, which can be used as a duration in any `var` object to continually use a value once it has been reached e.g. `var([0,1],[4,inf])`. This can be combined usefully with a special `var` object called `now` which starts the timing cycle for a `var` at the current time in the clock:
 
 ```python
@@ -16,10 +25,17 @@ d1 >> play("x-o-", amp=linvar([0,1],[8,inf], start=now))
 d1 >> play("x-o-").every(4, "stutter", dur=var([3,2],4))
 ```
 
-This because problematic when introducting `sometimes` as you would not know the frequency of the call in advance. Now you can just use `Cycle` which will be converted to a `var` with appropriate timing values when used with `every`. Any other use of `Cycle` will be treated as a regular `Pattern` object. Example of how to use `Cycle`:
+This became problematic when introducting `sometimes` as you would not know the frequency of the call in advance. Now you can just use `Cycle` which will be converted to a `var` with appropriate timing values when used with `every`. Any other use of `Cycle` will be treated as a regular `Pattern` object. Example of how to use `Cycle`:
 
 ```python
 d1 >> play("x-o-").sometimes("stutter", dur=Cycle([2,3]))
+```
+
+- Fix `Pattern.offlayer` which is similar to `offadd` but requires a second argument specifying a method apply to the second layer as a string *then* the duration to delay the layer before specifying the arguments and keyword arguments to be supplied to the given methods. E.g.
+
+```python
+# Layer with the pattern trimmed to length 3 with a delay of 0.75 beats
+P[0, 1, 2, 3].offlayer("trim", 0.75, 3)
 ```
 
 ---
@@ -35,7 +51,7 @@ d1 >> play("x-o-").sometimes("stutter", dur=Cycle([2,3]))
 
 #### Installing FoxDot
 
-- Open up a command prompt and type `pip install FoxDot`. This will download and install the latest stable version of FoxDot from the Python Package Index if you have properly configured Python.
+- Open up a command prompt and type `pip install --user FoxDot`. This will download and install the latest stable version of FoxDot from the Python Package Index if you have properly configured Python.
 - You can update FoxDot to the latest version if it's already installed by adding `-U` or `--upgrade` flag to this command.
 - Alternatively, you can build from source from directly from this repository:
 ``` bash
@@ -168,11 +184,24 @@ bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 
 ## Documentation
 
-For more information on FoxDot, please see the `docs` folder (although largely unwritten). Please note that FoxDot is still in development and is changing all the time. I do my best to keep the website and README up to date but don't always have the time.
+[Link to documentation website](https://docs.foxdot.org/) (still in progress)
 
 ## Using alternative editors
 
 FoxDot comes pre-packaged with its own basic editor so that you don't have to tinker with config files or download any other tools but if you want to use an existing editor you can. [Koltes](https://github.com/KoltesDigital) has written a plugin for the popular Atom editor. You can install it by going to Settings -> Install -> Searching "foxdot" and pressing install on the plug in. Press Ctrl+Alt+f or go to menu -> Packages -> FoxDot  -> Toggle to start FoxDot running.
+
+## Running Python files with FoxDot code
+
+You can import `FoxDot` into your own Python programs as you would any other module. If you are not writing an interactive program, i.e. only containing FoxDot code, then you need to call a function `Go()` at the end of your program to get playback otherwise the program will terminate immediately. For example your program, `my_file.py`, should look something like this:
+
+```python
+from FoxDot import *
+p1 >> pads([0, 1, 2, 3])
+d1 >> play("x-o-")
+Go()
+```
+
+Then just run like any other Python program: `python my_file.py`
 
 ## Thanks
 
