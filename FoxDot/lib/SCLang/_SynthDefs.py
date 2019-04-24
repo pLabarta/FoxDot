@@ -367,7 +367,7 @@ with SynthDef("jbass") as jbass:
 #     return
 
 
-if SC3_PLUGINS or True:
+if SC3_PLUGINS:
 
     piano = SynthDef("piano")
     piano.amp = piano.amp * 0.7

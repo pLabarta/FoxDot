@@ -119,6 +119,9 @@ class metaPattern(object):
         """ Returns a new pattern object with this Pattern's class type """
         return self.__class__(data + self.meta)
 
+    def transform(self, func):
+        return self.__class__([(item.transform(func) if isinstance(item, metaPattern) else func(item))for item in self])
+
     @classmethod
     def get_methods(cls):
         """ Returns the methods associated with the `Pattern` class as a list """
@@ -780,10 +783,25 @@ class metaPattern(object):
         new = []
         for item in self.data:
             if isinstance(item, metaPattern):
-                new.append(item.map(mapping))
+                new.append(item.submap(mapping))
             else:
-                new.append(mapping.get(item, 0))
+                new.append(mapping.get(item, item))
         return self.new(new)
+
+    def compress(self, selector):
+        """ Removes values from the pattern if the same index in selector is 0. 
+            Similar to .select() but maximum length of the new Pattern is the 
+            length of the initial Pattern.  """
+        s = asStream(selector)
+        return self.new([self[i] for i in range(len(self)) if s[i]])
+
+    def select(self, selector):
+        """ Removes values from the pattern if the same index in selector is 0  """
+        s = asStream(selector)
+        # Don't do anything if all values are 1
+        if all([value == 1 for value in s]):
+            return self
+        return self.new([self[i] for i in range(LCM(len(self), len(s))) if s[i]])    
 
     def layer(self, method, *args, **kwargs):
         """ Zips a pattern with a modified version of itself. Method argument

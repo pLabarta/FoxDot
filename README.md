@@ -13,13 +13,6 @@ FoxDot is a Python programming environment that provides a fast and user-friendl
 - Add `PDelta` pattern; user supplies the step sizes between each value.
 - Negative `offbeat` fix (thanks zdbm).
 
-- Fix `Pattern.offlayer` which is similar to `offadd` but requires a second argument specifying a method apply to the second layer as a string *then* the duration to delay the layer before specifying the arguments and keyword arguments to be supplied to the given methods. E.g.
-
-```python
-# Layer with the pattern trimmed to length 3 with a delay of 0.75 beats
-P[0, 1, 2, 3].offlayer("trim", 0.75, 3)
-```
-
 ---
 
 ## Installation and startup

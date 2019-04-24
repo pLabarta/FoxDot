@@ -59,7 +59,7 @@ from .Utils import modi
 from .ServerManager import TempoClient, ServerManager, RequestTimeout
 from .Settings import CPU_USAGE, CLOCK_LATENCY
 
-from time import sleep, time, clock
+import time
 from fractions import Fraction
 from traceback import format_exc as error_stack
 
@@ -71,6 +71,7 @@ class TempoClock(object):
 
     tempo_server = None
     tempo_client = None
+    waiting_for_sync = False
 
     def __init__(self, bpm=120.0, meter=(4,4)):
 
@@ -114,13 +115,16 @@ class TempoClock(object):
         # EspGrid sync
         self.espgrid = None
 
+        # Flag for next_bar wrapper
+        self.now_flag  = False
+
         # Can be configured
         self.latency_values = [0.25, 0.5, 0.75]
         self.latency    = 0.25 # Time between starting processing osc messages and sending to server
         self.nudge      = 0.0  # If you want to synchronise with something external, adjust the nudge
         self.hard_nudge = 0.0
 
-        self.bpm_start_time = time()
+        self.bpm_start_time = time.time()
         self.bpm_start_beat = 0
 
         # The duration to sleep while continually looping
@@ -142,30 +146,40 @@ class TempoClock(object):
         from .EspGrid import EspGrid
         self.espgrid = EspGrid((host, port))
         try:
-            self.espgrid.query()
+            tempo = self.espgrid.get_tempo()
         except RequestTimeout:
             err = "Unable to reach EspGrid. Make sure the application is running and try again."
             raise RequestTimeout(err)
-        self.espgrid.start_tempo()
+        
         self.espgrid.set_clock_mode(5)
         self._espgrid_update_tempo(True)
         return
 
     def _espgrid_update_tempo(self, force=False):
         """ Retrieves the current tempo from EspGrid and updates internal values """
+        
         data = self.espgrid.get_tempo()
+
+        # If the tempo hasn't been started, start it here and get updated data
+        
+        if data[0] == 0:
+            self.espgrid.start_tempo()
+            data = self.espgrid.get_tempo()
+        
         if force or (data[1] != self.bpm):
             self.bpm_start_time = float("{}.{}".format(data[2], data[3]))
             self.bpm_start_beat = data[4]
             object.__setattr__(self, "bpm", self._convert_json_bpm(data[1]))
+
         self.schedule(self._espgrid_update_tempo)
+        
         return
 
     def reset(self):
         """ Deprecated """
         self.time = self.dtype(0)
         self.beat = self.dtype(0)
-        self.start_time = time()
+        self.start_time = time.time()
         print("resetting clock")
         return
 
@@ -195,11 +209,15 @@ class TempoClock(object):
             self.tempo_server.kill()
         return
 
+    def flag_wait_for_sync(self, value):
+        self.waiting_for_sync = bool(value)
+
     def connect(self, ip_address, port=57999):
         try:
             self.tempo_client = TempoClient(self)
             self.tempo_client.connect(ip_address, port)
             self.tempo_client.send(["request"])
+            self.flag_wait_for_sync(True)
         except ConnectionRefusedError as e:
             print(e)
         pass
@@ -224,36 +242,46 @@ class TempoClock(object):
 
     def update_tempo_now(self, bpm):
         """ emergency override for updating tempo"""
-        object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-        self.last_now_call = self.bpm_start_time = time()
+        self.last_now_call = self.bpm_start_time = time.time()
         self.bpm_start_beat = self.now()
+        object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
         # self.update_network_tempo(bpm, start_beat, start_time) -- updates at the bar...
         return
 
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
         next_bar = self.next_bar()
-        bpm_start_time = time() + self.beat_dur(next_bar - self.now()) - (self.nudge + self.hard_nudge)
+
+        bpm_start_time = self.get_time_at_beat(next_bar)
         bpm_start_beat = next_bar
+
         def func():
             object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
             self.last_now_call = self.bpm_start_time = bpm_start_time
             self.bpm_start_beat = bpm_start_beat
+
         # Give next bar value to bpm_start_beat
         self.schedule(func, next_bar, is_priority=True)
+
         return bpm_start_beat, bpm_start_time
 
     def update_tempo_from_connection(self, bpm, bpm_start_beat, bpm_start_time, schedule_now=False):
-        """ Sets the bpm externally  from another connected instance of FoxDot """
+        """ Sets the bpm externally from another connected instance of FoxDot """
+
         def func():
-            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-            self.last_now_call = self.bpm_start_time = bpm_start_time
+            self.last_now_call = self.bpm_start_time = self.get_time_at_beat(bpm_start_beat)
             self.bpm_start_beat = bpm_start_beat
+            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+        
         # Might be changing immediately
         if schedule_now:
+        
             func()
+        
         else:
+        
             self.schedule(func, is_priority=True)
+        
         return 
 
     def update_network_tempo(self, bpm, start_beat, start_time):
@@ -365,11 +393,17 @@ class TempoClock(object):
 
     def get_elapsed_seconds_from_last_bpm_change(self):
         """ Returns the time since the last change in bpm """
-        return time() - (self.bpm_start_time + float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
+        # return (time.time() - self.bpm_start_time) + (float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
+        return self.get_time() - self.bpm_start_time
 
     def get_time(self):
         """ Returns current machine clock time with nudges values added """
-        return time() + float(self.nudge) + float(self.hard_nudge)
+        return time.time() + float(self.nudge) + float(self.hard_nudge)
+
+    def get_time_at_beat(self, beat):
+        """ Returns the time that the local computer's clock will be at 'beat' value """
+        # return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + (self.hard_nudge if hard_nudge else 0))
+        return self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
 
     def sync_to_midi(self, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
@@ -391,11 +425,11 @@ class TempoClock(object):
 
     def set_time(self, beat):
         """ Set the clock time to 'beat' and update players in the clock """
-        self.start_time = time()
+        self.start_time = time.time()
         self.queue.clear()
         self.beat = beat
         self.bpm_start_beat = beat
-        self.bpm_start_time = time()
+        self.bpm_start_time = self.start_time
         # self.time = time() - self.start_time
         for player in self.playing:
             player(count=True)
@@ -404,7 +438,8 @@ class TempoClock(object):
     def calculate_nudge(self, time1, time2, latency):
         """ Approximates the nudge value of this TempoClock based on the machine time.time()
             value from another machine and the latency between them """
-        self.hard_nudge = time2 - (time1 + latency)
+        # self.hard_nudge = time2 - (time1 + latency)
+        self.hard_nudge = time1 - time2 - latency
         return
 
     def _convert_bpm_json(self, bpm):
@@ -455,7 +490,7 @@ class TempoClock(object):
 
     def osc_message_time(self):
         """ Returns the true time that an osc message should be run i.e. now + latency """
-        return time() + self.latency
+        return time.time() + self.latency
         
     def start(self):
         """ Starts the clock thread """ 
@@ -559,7 +594,7 @@ class TempoClock(object):
 
             if self.sleep_time > 0:
 
-                sleep(self.sleep_time)
+                time.sleep(self.sleep_time)
 
         return
 

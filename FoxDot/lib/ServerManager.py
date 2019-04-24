@@ -896,7 +896,7 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         assert "init" in data
 
-        send_to_socket(self.request, {"clock_time": time.time()})
+        send_to_socket(self.request, {"clock_time": time.time()}) # maybe time at a beat?
 
         self.master.peers.append(self)
 
@@ -904,11 +904,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
             data = read_from_socket(self.request)
 
+            # If a client disconnects, remove and print message
+
             if data is None:
 
-                print("Client disconnected from {}".format(self.client_address))
-
-                break
+                return self.disconnect()
 
             else:
 
@@ -930,6 +930,11 @@ class RequestHandler(socketserver.BaseRequestHandler):
 
         return
 
+    def disconnect(self):
+        """ Prints a message to the master clock and removes a reference to this client """
+        print("Client disconnected from {}".format(self.client_address))
+        self.master.peers.remove(self)
+        return 0
 
     def update_tempo(self, bpm, bpm_start_beat, bpm_start_time):
 
@@ -1034,7 +1039,8 @@ class TempoClient:
 
         self.stop_timing()
 
-        self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
+        # self.metro.calculate_nudge(time_data["clock_time"], self.stop_time, self.latency)
+        self.metro.calculate_nudge(time_data["clock_time"], self.start_time, self.latency)
         
         # Enter loop
 
@@ -1053,9 +1059,14 @@ class TempoClient:
                 break
             
             if "sync" in data:
+
                 for key in self.sync_keys:
                     if key in data["sync"]:
-                        setattr(self.metro, key, data["sync"][key])
+                        object.__setattr__(self.metro, key, data["sync"][key])
+
+                self.metro.update_tempo_from_connection(**data["sync"])
+
+                self.metro.flag_wait_for_sync(False)
             
             elif "new_bpm" in data:
 
@@ -1085,4 +1096,6 @@ if __name__ != "__main__":
 
     from .Settings import ADDRESS, PORT, PORT2
 
-    DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
+    # DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
+    Server = SCLangServerManager(ADDRESS, PORT, PORT2)
+

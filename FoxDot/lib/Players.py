@@ -321,6 +321,7 @@ class Player(Repeatable):
         self.attr  = {}
         self.modifier = Pattern()
         self.mod_data = 0
+        self.filename = None
 
         # Keyword arguments that are used internally
 
@@ -397,52 +398,51 @@ class Player(Repeatable):
 
         return self
 
-    def test_for_circular_reference(self, attr, value, last_parent=None, last_key=None):
+    def test_for_circular_reference(self, value, attr, last_player=None, last_attr=None):
         """ Used to raise an exception if a player's attribute refers to itself e.g. `p1 >> pads(dur=p1.dur)` """
 
-        # If we are setting a group of values, check each one in turn
+        # We are setting self.attr to value, check if value depends on self.attr
 
         if isinstance(value, PGroup):
-            
+
             for item in value:
-            
-                self.test_for_circular_reference(attr, item, last_parent,  last_key)
+
+                self.test_for_circular_reference(item, attr, last_player, last_attr)
 
         elif isinstance(value, PlayerKey):
-          
-            # If the original Player is *this* player and we are referencing the same attr, throw and exception
-         
-            if value.parent is self and attr == value.key:
 
-                ident_self  = "{}.{}".format(self.id if self.id is not None else str(self), attr)
-                
-                if last_parent is not None:
-                    
-                    ident_other = "{}.{}".format(last_parent.id if last_parent.id is not None else str(last_parent), last_key)
-                
+            # If the Player key relies on this player.attr, raise error
+
+            if value.cmp(self, attr):
+
+                ident_self = value.name()
+
+                if last_player is not None:
+
+                    ident_other = "{}.{}".format(last_player.id, last_attr)
+
                 else:
-                
+
                     ident_other = ident_self
 
                 err = "Circular reference found: {} to itself via {}".format(ident_self, ident_other)
-                
-                raise ValueError(err)
-            
-            # If we get the same parent and key, stop
 
-            elif last_parent == value.parent and last_key == value.key:
-            
+                raise ValueError(err)
+
+            elif last_player == value.player and last_attr == value.attr:
+
                 return
-            
+
             else:
 
-                # Check if other values in the parent might have a circular reference e.g. p1 >> pads([0,1,p2.degree])
+                # Go through the player key's 
+
+                for item in value.get_player_attribute():
             
-                for item in value.parent.attr[value.key]:
-            
-                    self.test_for_circular_reference(attr, item, last_parent=value.parent, last_key=value.key)
+                    self.test_for_circular_reference(item, attr, value.player, value.attr)
+
         return
-       
+
     def __setattr__(self, name, value):
 
         # Possibly replace with slots?
@@ -459,11 +459,11 @@ class Player(Repeatable):
 
                 value = asStream(value)
 
-                for item in value: # maybe use a deepiter method
+                for item in value:
 
-                    self.test_for_circular_reference(name, item)
+                    self.test_for_circular_reference(item, name)
 
-                # Update the attribute dict
+                # Update the attribute dict if no error
                 
                 self.attr[name] = value
 
@@ -664,8 +664,7 @@ class Player(Repeatable):
         self.get_event() 
 
         # Play the note
-
-        # if type(self.event['dur']) != rest:
+        
         if not isinstance(self.event["dur"], rest):
         
             self.send(verbose=(self.metro.solo == self and kwargs.get('verbose', True)))
@@ -686,7 +685,7 @@ class Player(Repeatable):
 
             dur *= tempo_shift
 
-        # Schedule the next event
+        # Schedule the next event (could move before get_event and use the index for get_event)
 
         self.event_index = self.event_index + dur
 
@@ -793,6 +792,11 @@ class Player(Repeatable):
 
         # Make sure all values are reset to start
 
+        if "filename" in kwargs:
+
+            self.filename = kwargs["filename"]
+            del kwargs["filename"]
+
         if self.isplaying is False:
 
             self.reset() 
@@ -870,7 +874,15 @@ class Player(Repeatable):
 
             # If we want to update now, set the start point to now
 
-            if kwargs.get("quantise", True) == False:
+            after = True
+
+            if self.metro.now_flag:
+
+                start_point = self.metro.now()
+
+                after = False
+
+            elif kwargs.get("quantise", True) == False:
 
                 start_point = self.metro.now()
 
@@ -880,7 +892,7 @@ class Player(Repeatable):
 
             self.event_n = 0
 
-            self.event_n, self.event_index = self.count(start_point, event_after=True)
+            self.event_n, self.event_index = self.count(start_point, event_after=after)
 
             self.metro.schedule(self, self.event_index)
 
@@ -1194,7 +1206,7 @@ class Player(Repeatable):
         """
         if (key not in self.__dict__) or (not isinstance(self.__dict__[key], PlayerKey)):
 
-            self.__dict__[key] = PlayerKey(value, parent=self, attr=key) 
+            self.__dict__[key] = PlayerKey(value, player=self, attr=key) 
 
         else:
 
@@ -1297,7 +1309,7 @@ class Player(Repeatable):
 
         if item.parent is self:
 
-            self.update_player_key(item.key, self.now(item.key), 0)
+            self.update_player_key(item.attr, self.now(item.attr), 0)
 
         # If the parent is in the same queue block, make sure its values are up-to-date
 
@@ -1307,7 +1319,7 @@ class Player(Repeatable):
 
             try:
 
-                queue_item = self.queue_block[item.parent]
+                queue_item = self.queue_block[item.player]
 
             except KeyError:
 
@@ -1317,7 +1329,7 @@ class Player(Repeatable):
 
             if queue_item is not None and queue_item.called is False:
                     
-                item.parent.update_player_key(item.key, item.parent.now(item.key), 0)
+                item.player.update_player_key(item.attr, item.player.now(item.attr), 0)
 
         return item.now()
 
@@ -1798,6 +1810,33 @@ class Player(Repeatable):
 
         return self
 
+    def versus(self, other_key, rule=lambda x, y: x > y, attr=None):
+        """ Sets the 'amplify' key for both players to be dependent on the comparison of keys """
+
+        # Get reference to the second player object
+
+        other = other_key.player
+
+        # Get the attribute from the key to versus
+
+        this_key = getattr(self, other_key.attr if attr is None else attr)
+
+        # Set amplifications based on the rule
+
+        self.amplify  = this_key.transform(lambda value: rule(value, other_key.now()))
+        other.amplify = this_key.transform(lambda value: not rule(value, other_key.now()))
+
+        return self
+
+    def reload(self):
+        """ If this is a 'play' or 'loop' SynthDef, reload the filename used"""
+
+        if self.synthdef == LoopPlayer:
+
+            Samples.reload(self.filename)
+
+        return self
+
     def only(self):
         """ Stops all players except this one """
         for player in list(self.metro.playing):
@@ -1842,12 +1881,12 @@ class Player(Repeatable):
             self._versus = None
         return self
 
-    def versus(self, other, func = lambda a, b: a > b):
+    # def versus(self, other, func = lambda a, b: a > b):
 
-        self.amp  = self.pitch > other.pitch
-        other.amp = other.pitch > self.pitch
+    #     self.amp  = self.pitch > other.pitch
+    #     other.amp = other.pitch > self.pitch
 
-        return self
+    #     return self
     
 
     # Utils
@@ -1910,8 +1949,8 @@ class Player(Repeatable):
     def offbeat(self, dur=1):
         """ Off sets the next event occurence """
 
-        self.dur = dur
-        self.delay = dur / 2
+        self.dur = abs(dur)
+        self.delay = abs(dur) / 2
 
         return self
 
