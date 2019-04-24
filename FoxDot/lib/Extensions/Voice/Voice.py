@@ -22,7 +22,7 @@ def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale,sex,foxdot_root
 
 	generateVoiceSpecification(lyrics,tempo,VOICE_XML_ORIGINAL,VOICE_XML_PROCESSED)
 
-	os.popen("LD_LIBRARY_PATH=/usr/lib /home/mathi/Desktop/MyBand/2.sound/synthesis/sinsy/RealTimeSingingSynthesis/synthesisSoftware/Sinsy-NG-0.0.1/build/sinsyNG -t "+str(tempo)+" -m es -o " + LAST_VOICE_WAV + " " + VOICE_XML_PROCESSED)
+	os.popen("LD_LIBRARY_PATH=/usr/lib /media/mathi/Personal/MyBand/2.sound/synthesis/sinsy/RealTimeSingingSynthesis/synthesisSoftware/Sinsy-NG-0.0.1/build/sinsyNG -t "+str(tempo)+" -m es -o " + LAST_VOICE_WAV + " " + VOICE_XML_PROCESSED)
 
 	os.system("rm -f " + WAVS_ROOT + outputName + ".wav")
 
