@@ -62,11 +62,11 @@
 from __future__ import absolute_import, division, print_function
 
 import os.path
-from .Settings import EFFECTS_DIR, SC3_PLUGINS
-from .ServerManager import DefaultServer
+from ..Settings import EFFECTS_DIR, SC3_PLUGINS
+from ..ServerManager import Server
 
 class Effect:
-    server=DefaultServer
+    server=Server
     def __init__(self, foxdot_name, synthdef, args={}, control=False):
 
         self.name      = foxdot_name
