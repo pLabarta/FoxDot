@@ -33,7 +33,7 @@ class VoiceSynthDef(SynthDef):
         else:
             sex = "female"
 
-        scale = list(Scale.default)
+        scale = Scale.default.semitones
         tempo = int(Clock.bpm)
 
         notes = list(map(lambda x: x + Root.default,notes))

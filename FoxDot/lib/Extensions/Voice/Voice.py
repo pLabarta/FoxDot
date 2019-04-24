@@ -30,7 +30,7 @@ def renderizeVoice(outputName,lyrics,notes,durations,tempo,scale,sex,foxdot_root
 
 def tokenize(text):
 	textSyllables = cleanText(text)
-	return filter(lambda x: len(x) > 0, textSyllables.replace(" ", "-").split("-"))
+	return list(filter(lambda x: len(x) > 0, textSyllables.replace(" ", "-").split("-")))
 
 def cleanText(text):
 

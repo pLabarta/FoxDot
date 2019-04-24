@@ -1,12 +1,358 @@
+Scale.default = Scale.minor
+
+from .Extensions.VRender import vrender
+from .Extensions.Voice import voice
+
+voice([3,2,1,0,4,4,4,4],name="v2")
+
+d1 >> play("AQ")
+
+voice([0,2,4,5,2,0,2,1,4],dur=[1,1,2])
+
+d2 >> play("<|V0|:><  O ><|[--]5|>", sample=2)
+
+d3 >> quin(var([(0,2,4),(2,4,6),(3,7),(4,6,8)],4),dur=PSum(3,4))
+
+d3.stop()
+
+v1 >> loop('v1',P[0:16],dur=1,amp=4)
+
+voice([3,3,3,4])
+
+letra = "nos vimos, nonos vimos pasó unaño, pasaron dos nos vimos, nos volvimosaver  plaza, nubes, aliens, ciencia tarot, destino, la agronomía  hicimos cosasnuevas, lapasamos bien hicimos cosasviejas, lapasamos bien  postniños asiáticos proto obesos tests deadene yplanes deviajes  cambios, aprendizaje ynuevas perspectivas sarcasmo, besos yatajos deteclado  nosmantenemos ensilencio, nosmiramos yquizashablamos comemoshelado yhacemos representacionesteatrales deantiguasvacaciones me cocinasbien, yotambién tecocino nos besamosdespiertos, también dormidos  sos lo mas valioso, pero ya lo sabes me cambiaste la vida, pero ya lo sabes amo estar con vos, pero ya lo sabes estas hecha de rubis, pero ya lo sabes"
+n = len(letra.split())
+
+voice([0]*n,lyrics=letra)
+
+Samples.free(int(v2.buf))
+
+v2 >> loop('v1',P[0:n], amp=var([4],[1]), formant=var([0],4))
+
+voice([9,8]*4,dur=[1,1,1,1],lyrics="linus trovalds",file="v2")
+
+voice(map(lambda x: x + 3,[0,1,2,3,4,2,5,2]),dur=[1],lyrics="software libre la flisol",file="v2")
+
+m1 >> pluck()
+
+
+v2.stop()
+
+Samples.free(int(v1.buf))
+v1 >> loop('v2',P[0:8], amp=var([10],[1,1]), formant=var([0],4),dur=1)
+
+m1 >> sawbass(var([0,2,3,4],4),dur=PSum(1,4),oct=5,amp=3)
+
+Clock.next(m1)
+
+p1 >> charm(var([(0,2,4),(2,[3,4],6),(3,7),(4,8)],4),dur=PSum(4,4),oct=6)
+
+d1 >> play("x-o-",dur=1)
+
+v1.stop()
+v2.stop()
+
+v2.reset()
+
+print(SynthDefs)
+
+
+m1.stop()
+d1.stop()
+
+d1 >> play("xO")
+
+
+
+d2.stop()
+#---------- VIEJO -------------
+
+
+
+d2 >> play("o-x--",dur=1)
+
+
+
+d1 >> play("KA")
+d2 >> sawbass([0,3,4],dur=PSum(4,4),amp=1.5)
+
+v1 >> loop("wavName12",P[4:8], amp=5)
+
+vrender([0], file="wavName12", lyrics="hey ho lets go", dur=[1,1,1,1],sex="male") # Generate voice audio file
+
+m2 >> quin([0,2]+var([(0,2,4)]),dur=2,amp=0.5)
+
+m2.stop()
+
+v1 >> pluck([0,2,4,5],dur=0.5)
+
+from .Extensions.VRender import vrender
+
+
+from .Extensions.Voice import voice
+
+lyrics = "faa"
+
+notas = [2,2,0,4,4,0]
+duracion = [1,1,2,1,1,2]
+
+print(duracion)
+
+d1 >> loop("wavName9",P[4:8], amp=5)
+
+v1 >> loop("mujer",4,dur=16,amp=volumen)
+
+
+voice("varon3", lyrics=lyrics, dur=duracion,tempo=160,scale=Scale.minor)
+
+Clock.bpm = 80
+
+volumen = 7
+
+print(SynthDefs)
+
+def secA1():    
+    d1 >> play("<|V0|:><  O ><|[--]5|>", sample=2)
+    c1 >> play("n", dur=1/4, sample=PRand(8), pan=PWhite(-1,1))
+    p3 >> pulse([0,1,0,[1,2],0,4,5,4], lpf=linvar([500,2000],32), lpr=linvar([0.1,1],12), dur=1/2, amp=2*P[1,1,1,1,0,1,1,1]).spread().penta() + var([0,[1,2,3,-1]],[6,2])
+    Clock.future(8, secA2)
+
+def secA11():    
+    v1 >> loop("mujer",2,dur=16,amp=volumen)
+    d1 >> play("<|V0|:><  O ><|[--]5|>", sample=2)
+    c1 >> play("n", dur=1/4, sample=PRand(8), pan=PWhite(-1,1))
+    p3 >> pulse([0,1,0,[1,2],0,4,5,4], lpf=linvar([500,2000],32), lpr=linvar([0.1,1],12), dur=1/2, amp=2*P[1,1,1,1,0,1,1,1]).spread().penta() + var([0,[1,2,3,-1]],[6,2])
+    Clock.future(8, secA2)
+
+def secA2():
+    v2 >> loop("varon3",2,dur=16,amp=volumen)
+    v1 >> loop("siamujer",[20],dur=[4],amp=volumen)    
+    p3 >> pulse([0,0,1,[0,5],0,0,4,[5,7]],dur=1/2).spread().penta() + var([0,[1,2,3,-1]],[6,2])
+    Clock.future(8, secB1)
+
+
+
+p3 >> pulse([0,0,1,[0,5],0,0,4,[5,7]],dur=1/2).spread().penta() + var([0,[1,2,3,-1]],[6,2])
+
+p3.stop()
+
+
+def secA():
+    c1 >> sawbass([0,4,5,3], dur=4)
+    Clock.future(16, secB)
+def secB():
+    d1 >> play("x-o-")
+    Clock.future(16, secA1)
+def secA1():
+    c1 >> sawbass([0,4,5,3], dur=4)
+    d1 >> play("x-o-")
+    v1 >> loop("mujer",4,dur=16,amp=volumen)
+    Clock.future(16, secA2)
+def secA2():
+    c1 >> sawbass([0,0,0,0,2,4,4,4,4,7,5,5,5,5,4,3,3,3,3,4], dur=[1,1,1,0.5,0.5])
+    d1 >> play("x-o-")
+    v1 >> loop("mujer",[2,4],dur=1,amp=volumen)
+    Clock.future(16, secA1)
+
+secA()
+ 
+chord = lambda x : tuple(map(lambda n: n+x, [0,4,7]))
+
+c1 >> sawbass([0,3], dur=4)
+
+print(SynthDefs)
+
+
+b1 >> rhodes([0,2,4],dur=[2,1,1])
+
+m1 >> nylon(PWalk(2),dur=0.5)
+
+d1.stop()
+
+
+Scale.default = Scale.minor
+
+
+
+
+
+
+
+
+
+
 from .Extensions.Voice import voice
 from .Extensions.VRender import vrender
 
 vrender([4,3,2,1,5,3,2,4,0,0],dur=[1,1,2],lyrics="chau")
 
-voice([4,3,2,1,5,3,2,4,0,0],dur=[1,1,2],lyrics="la")
 
 Samples.free(int(v1.buf))
-v1 >> loop('v1',P[0:12],dur=1,amp=2)
+
+v1 >> loop('v1',P[0:6],dur=1,amp=10)
+
+print(v1.buf)
+
+print(Root.default)
+
+
+
+d1 >> pluck()
+
+
+p2.stop()
+
+Samples.free(Samples.getBufferFromSymbol('v1'))
+
+
+p2 >> sawbass([0,0,2,0,2,2,2],dur=PSum(7,4))#var([4,4],dur=4))
+
+p3 >> play("ko",dur=1)
+
+m1 >> quin(PWalk(2),dur=PDur(5,2),amp=1.5)
+
+m1.stop()
+
+
+p4 >> 
+
+p1.stop()
+
+
+
+
+p2.stop()wa
+
+vrender([0,2,0,4])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+from .Extensions.VRender import vrender
+
+lyrics = "Party girls don't get hurt Can't feel anything, when will I learn I push it down, push it down I'm the one for a good time call Phone's blowin' up, they're ringin' my doorbell I feel the love, feel the love One, two, three, one, two, three, drink One, two, three, one, two, three, drink One, two, three, one, two, three, drink Throw em back, till I lose count I'm gonna swing from the chandelier, from the chandelier I'm gonna live like tomorrow doesn't exist Like it doesn't exist I'm gonna fly like a bird through the night, feel my tears as they dry I'm gonna swing from the chandelier, from the chandelier"
+
+notas = [2,2,0,4,4,0]
+duracion = [1,1,2,1,1,2]
+
+vrender(notas*5,file="voz1", lyrics=lyrics, dur=duracion*5,tempo=160,scale=Scale.minor,sex="female")
+
+Clock.bpm = 80
+Scale.default = Scale.minor
+
+
+
+volumen = 7
+
+def secA():
+    c1 >> sawbass([0,4,5,3], dur=4)
+    Clock.future(16, secB)
+def secB():
+    d1 >> play("x-o-")
+    Clock.future(16, secA1)
+def secA1():
+    c1 >> sawbass([0,4,5,3], dur=4)
+    d1 >> play("x-o-")
+    v1 >> loop("voz1",4,dur=16,amp=volumen)
+    Clock.future(16, secA2)
+def secA2():
+    c1 >> sawbass([0,0,0,0,2,4,4,4,4,7,5,5,5,5,4,3,3,3,3,4], dur=[1,1,1,0.5,0.5])
+    d1 >> play("x-o-")
+    v1 >> loop("voz1",[2,4],dur=1,amp=volumen)
+    Clock.future(16, secA1)
+
+secA()
+
+
+
+print(SynthDefs)
+
+# buenos sonidos: A, Z, C, !, B
+d1 >> play("B ").every(3, "stutter", 4, dur=1, degree="y", ident=1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+c1 >> play("x   x", dur=4)
+
+
+d3 >> viola([0,2,4,7,5,4,2],dur=[1,1,1,1,2,1,1])
+
+d3.stop()
+
+
+chord = lambda x : tuple(map(lambda n: n+x, [0,4,7]))
+
+c1 >> sawbass([0,3], dur=4)
+
+print(SynthDefs)
+
+def secA1():    
+    d1 >> play("<|V0|:><  O ><|[--]5|>", sample=2)
+    c1 >> play("n", dur=1/4, sample=PRand(8), pan=PWhite(-1,1))
+    p3 >> pulse([0,1,0,[1,2],0,4,5,4], lpf=linvar([500,2000],32), lpr=linvar([0.1,1],12), dur=1/2, amp=2*P[1,1,1,1,0,1,1,1]).spread().penta() + var([0,[1,2,3,-1]],[6,2])
+    Clock.future(8, secA2)
+def secA11():    
+    v1 >> loop("mujer",2,dur=16,amp=volumen)
+    d1 >> play("<|V0|:><  O ><|[--]5|>", sample=2)
+    c1 >> play("n", dur=1/4, sample=PRand(8), pan=PWhite(-1,1))
+    p3 >> pulse([0,1,0,[1,2],0,4,5,4], lpf=linvar([500,2000],32), lpr=linvar([0.1,1],12), dur=1/2, amp=2*P[1,1,1,1,0,1,1,1]).spread().penta() + var([0,[1,2,3,-1]],[6,2])
+    Clock.future(8, secA2)
+def secA2():
+    v2 >> loop("varon3",2,dur=16,amp=volumen)
+    v1 >> loop("siamujer",[20],dur=[4],amp=volumen)    
+    p3 >> pulse([0,0,1,[0,5],0,0,4,[5,7]],dur=1/2).spread().penta() + var([0,[1,2,3,-1]],[6,2])
+    Clock.future(8, secA11)
+
+
+p3 >> pulse([0,0,1,[0,5],0,0,4,[5,7]],dur=1/2).spread().penta() + var([0,[1,2,3,-1]],[6,2])
+
+p3.stop()
+from .Extensions.Voice import voice
+from .Extensions.VRender import vrender
+
+vrender([4,3,2,1,5,3,2,4,0,0],dur=[1,1,2],lyrics="chau")
+
+voice([0,0,0,0],dur=[1],lyrics="salí del camino sáli")
+
+Samples.free(int(v2.buf))
+v2 >> loop('v1',P[0:4],dur=1,amp=2)
+
+v2.reset()
 
 print(v1.buf)
 
@@ -16,6 +362,8 @@ p2.stop()
 
 Samples.free(Samples.getBufferFromSymbol('v1'))
 
+print(Scale.default.semitones)
+print(Scale.default.data)
 
 p2 >> sawbass([0,0,2,0,2,2,2],dur=PSum(7,4))#var([4,4],dur=4))
 
