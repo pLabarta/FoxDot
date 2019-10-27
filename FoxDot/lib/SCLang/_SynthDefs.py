@@ -382,6 +382,9 @@ sawbass.add()
 prophet = FileSynthDef('prophet')
 prophet.add()
 
+rhodes = FileSynthDef("rhodes")
+rhodes.add()
+
 pads = FileSynthDef('pads')
 pads.add()
 
