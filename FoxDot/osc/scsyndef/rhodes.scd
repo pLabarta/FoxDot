@@ -29,4 +29,3 @@ SynthDef(\rhodes, {
     snd = Pan2.ar(snd, pan, amp);
 
     Out.ar(out, snd);
-}).add;
