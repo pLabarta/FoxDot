@@ -1,9 +1,9 @@
 from __future__ import absolute_import, print_function
 
-from .Voice import renderizeVoice
 from ...SCLang import SynthDef
 from ... import Clock, Scale, Root
 from ...Settings import FOXDOT_ROOT
+import threading, os
 
 class VoiceSynthDef(SynthDef):
 
@@ -19,9 +19,9 @@ class VoiceSynthDef(SynthDef):
             lyrics = "oo "
 
         if "dur" in kwargs:
-            durations = kwargs['dur']
+            durations = ",".join(map(str,kwargs['dur']))
         else:
-            durations = [1]
+            durations = 1
 
         if 'file' in kwargs:
             filename = kwargs['file']
@@ -33,11 +33,34 @@ class VoiceSynthDef(SynthDef):
         else:
             sex = "female"
 
-        scale = Scale.default.semitones
+        if "octave" in kwargs:
+            octave = kwargs["octave"]
+        else:
+            octave = 6
+
+        if "lang" in kwargs:
+            language = kwargs["lang"]
+        else:
+            language = "es"
+
+        scale = ",".join(map(str,Scale.default.semitones))
         tempo = int(Clock.bpm)
 
-        notes = list(map(lambda x: x + Root.default,notes))
+        notes = ",".join(map(str,notes))
 
-        renderizeVoice(filename,lyrics,notes,durations,tempo,scale,sex,FOXDOT_ROOT)
+        dst_path = FOXDOT_ROOT + '/snd/_loop_/' + filename + '.wav'
+
+        root = Root.default
+
+        path = "/media/mathi/Personal/MyBand/2.sound/synthesis/sinsy/RealTimeSingingSynthesis_dl"
+
+        if "model" in kwargs:
+            command = f"python {path}/main.py notes={notes} octave={octave} root={root} dur={durations} lang={language} file={dst_path} tempo={tempo} scale={scale} lyrics=\"{lyrics}\" model={model}"
+        else:
+            command = f"python {path}/main.py notes={notes} octave={octave} root={root} dur={durations} lang={language} file={dst_path} tempo={tempo} scale={scale} lyrics=\"{lyrics}\""
+
+        print("Ejecutando esto:",command)
+        threading.Thread(target = lambda : os.system(command)).start()
+
 
 voice = VoiceSynthDef()
