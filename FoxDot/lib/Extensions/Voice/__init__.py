@@ -43,8 +43,15 @@ class VoiceSynthDef(SynthDef):
         else:
             language = "es"
 
-        scale = ",".join(map(str,Scale.default.semitones))
-        tempo = int(Clock.bpm)
+        if "scale" in kwargs:
+            scale = ",".join(map(str,kwargs["scale"]))
+        else:
+            scale = ",".join(map(str,Scale.default.semitones))
+
+        if "tempo" in kwargs:
+            tempo = kwargs["tempo"]
+        else:
+            tempo = int(Clock.bpm)
 
         notes = ",".join(map(str,notes))
 
