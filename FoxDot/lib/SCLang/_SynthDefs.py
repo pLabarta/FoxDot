@@ -429,9 +429,30 @@ waveguideFlute.add()
 # Suenan mal
 
 acid309 = FileSynthDef("acid309")
+acid309.gate=1
+acid309.amp = 0.5
 acid309.add()
 
 cs80lead = FileSynthDef("cs80lead")
+cs80lead.freq=880
+cs80lead.amp=0.5
+cs80lead.attack=0.75
+cs80lead.decay=0.5
+cs80lead.sustain=0.8
+cs80lead.release=1.0
+cs80lead.fatt=0.75
+cs80lead.fdecay=0.5
+cs80lead.fsus=0.8
+cs80lead.frel=1.0
+cs80lead.cutoff=200
+cs80lead.pan=0
+cs80lead.dtune=0.002
+cs80lead.vibrate=4
+cs80lead.vibdepth=0.015
+cs80lead.gate=1.0
+cs80lead.ratio=1
+cs80lead.out=0
+cs80lead.cbus=1
 cs80lead.add()
 
 bass8 = FileSynthDef("bass8")
@@ -478,6 +499,7 @@ phazer.crv = -4
 phazer.add()
 
 oneclapThor = FileSynthDef("oneclapThor")
+oneclapThor.out = 0
 oneclapThor.amp = 0.1
 oneclapThor.att = 0.003
 oneclapThor.rel = 0.00035
@@ -497,6 +519,79 @@ oneclapThor.mix = 0.23
 oneclapThor.damp = 0.5;
 oneclapThor.add()
 
+
+acidOto3091 = FileSynthDef('acidOto3091')
+acidOto3091.out=0
+acidOto3091.gate=1
+acidOto3091.freq=440
+acidOto3091.amp=0.1
+acidOto3091.pan=0
+acidOto3091.att=0.001
+acidOto3091.dec=0.5
+acidOto3091.sus=0.1
+acidOto3091.rel=0.5
+acidOto3091.curve=-4
+acidOto3091.add()
+
+acidOto3092 = FileSynthDef('acidOto3092')
+acidOto3092.out=0
+acidOto3092.freq=440
+acidOto3092.amp=0.1
+acidOto3092.pan=0
+acidOto3092.att=0.001
+acidOto3092.rel=0.5
+acidOto3092.lagTime=0.12
+acidOto3092.filterRange=6
+acidOto3092.width=0.51
+acidOto3092.r1=0.3
+acidOto3092.add()
+
+bassWarsaw = FileSynthDef('bassWarsaw')
+bassWarsaw.out=0
+bassWarsaw.freq=440
+bassWarsaw.gate=1
+bassWarsaw.amp=0.5
+bassWarsaw.pan=0
+bassWarsaw.att=0.01
+bassWarsaw.dec=0.3
+bassWarsaw.sus=0.4
+bassWarsaw.rel=0.1
+bassWarsaw.slideTime=0.17
+bassWarsaw.cutoff=1100
+bassWarsaw.width=0.15
+bassWarsaw.detune=1.005
+bassWarsaw.preamp=4
+bassWarsaw.add
+
+sillyVoice = FileSynthDef('sillyVoice')
+sillyVoice.freq=220
+sillyVoice.amp=0.5
+sillyVoice.vibratoSpeed = 6
+sillyVoice.vibratoDepth = 4
+sillyVoice.vowel = 0
+sillyVoice.att = 0.01
+sillyVoice.rel = 0.1
+sillyVoice.lag = 1
+sillyVoice.gate = 1
+sillyVoice.add()
+
+combs = FileSynthDef('combs')
+combs.out=0
+combs.pan=0
+combs.amp=0.1
+combs.freq=440
+combs.gate=1
+combs.att=0.01
+combs.dec=0.1
+combs.sus=0.7
+combs.rel=0.5
+combs.rate=6
+combs.depth=0.2
+combs.regen=-3
+combs.sweep=16
+combs.rq=0.5
+combs.harmonic=1.5
+combs.add()
 
 # Get rid of the variable synth
 
