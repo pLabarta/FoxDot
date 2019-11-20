@@ -384,6 +384,13 @@ prophet = FileSynthDef('prophet')
 prophet.add()
 
 rhodes = FileSynthDef("rhodes")
+rhodes.gate = 1
+rhodes.amp = 0.1
+rhodes.vel = 0.8
+rhodes.modIndex = 0.2
+rhodes.mix = 0.2
+rhodes.lfoSpeed = 0.4
+rhodes.lfoDepth = 0.1
 rhodes.add()
 
 pads = FileSynthDef('pads')
@@ -394,18 +401,6 @@ pasha.add()
 
 ambi = FileSynthDef("ambi")
 ambi.add()
-
-rhodes = FileSynthDef("rhodes")
-rhodes.add()
-
-acid309 = FileSynthDef("acid309")
-acid309.add()
-
-cs80lead = FileSynthDef("cs80lead")
-cs80lead.add()
-
-bass8 = FileSynthDef("bass8")
-bass8.add()
 
 space = FileSynthDef("space")
 space.add()
@@ -418,6 +413,90 @@ dbass.add()
 
 sinepad = FileSynthDef("sinepad") 
 sinepad.add()
+
+waveguideFlute = FileSynthDef("waveguideFlute")
+waveguideFlute.scl = 0.2
+waveguideFlute.freq = 440
+waveguideFlute.ipress = 0.9
+waveguideFlute.ibreath = 0.09
+waveguideFlute.ifeedbk1 = 0.4
+waveguideFlute.ifeedbk2 = 0.4
+waveguideFlute.dur = 1
+waveguideFlute.gate = 1
+waveguideFlute.amp = 2
+waveguideFlute.add()
+
+# Suenan mal
+
+acid309 = FileSynthDef("acid309")
+acid309.add()
+
+cs80lead = FileSynthDef("cs80lead")
+cs80lead.add()
+
+bass8 = FileSynthDef("bass8")
+bass8.add()
+
+tubularbell = FileSynthDef("tubularBell")
+tubularbell.att = 0.005
+tubularbell.rel = 9
+tubularbell.exciterRel = 0.05
+tubularbell.chaosUpStart = 0
+tubularbell.chaosUpEnd = 0.5
+tubularbell.chaosUpTime = 1
+tubularbell.chaosDownStart = 0
+tubularbell.chaosDownEnd = 0
+tubularbell.chaosDownTime = 1
+tubularbell.cutoff = 20000
+tubularbell.reHashesPerCycle = 1
+tubularbell.hashRate = 1
+tubularbell.nyquist = 5000
+tubularbell.add()
+
+chaoscillator = FileSynthDef("chaoscillator")
+chaoscillator.gate = 1
+chaoscillator.att = 0.01
+chaoscillator.rel = 1.5
+chaoscillator.curve = -4
+chaoscillator.add()
+
+glockenspiel = FileSynthDef("glockenspiel")
+glockenspiel.amp = 0.01
+glockenspiel.att = 0.001
+glockenspiel.rel = 6
+glockenspiel.exciterRel = 0.05
+glockenspiel.add()
+
+phazer = FileSynthDef("phazer")
+phazer.amp = 0.5
+phazer.gate = 1
+phazer.att = 1
+phazer.dec = 3
+phazer.sus = 0
+phazer.rel = 1.5
+phazer.crv = -4
+phazer.add()
+
+oneclapThor = FileSynthDef("oneclapThor")
+oneclapThor.amp = 0.1
+oneclapThor.att = 0.003
+oneclapThor.rel = 0.00035
+oneclapThor.freq = 100
+oneclapThor.rq = 0.1
+oneclapThor.pan = 0
+oneclapThor.echohz1 = 33.333
+oneclapThor.echohz2 = 33.156
+oneclapThor.curve = -4
+oneclapThor.decay = 0.06
+oneclapThor.shelfFreq = 7000
+oneclapThor.rs = 0.5
+oneclapThor.db = -3
+oneclapThor.size = 0.15
+oneclapThor.tone = 0.4
+oneclapThor.mix = 0.23
+oneclapThor.damp = 0.5;
+oneclapThor.add()
+
 
 # Get rid of the variable synth
 
