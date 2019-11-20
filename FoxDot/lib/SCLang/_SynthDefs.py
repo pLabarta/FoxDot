@@ -426,7 +426,54 @@ waveguideFlute.gate = 1
 waveguideFlute.amp = 2
 waveguideFlute.add()
 
-# Suenan mal
+
+acidOto3091 = FileSynthDef('acidOto3091')
+acidOto3091.out=0
+acidOto3091.gate=1
+acidOto3091.freq=440
+acidOto3091.amp=0.1
+acidOto3091.pan=0
+acidOto3091.att=0.001
+acidOto3091.dec=0.5
+acidOto3091.sus=0.1
+acidOto3091.rel=0.5
+acidOto3091.curve=-4
+acidOto3091.add()
+
+
+sillyVoice = FileSynthDef('sillyVoice')
+sillyVoice.freq=220
+sillyVoice.amp=0.5
+sillyVoice.vibratoSpeed = 6
+sillyVoice.vibratoDepth = 4
+sillyVoice.vowel = 0
+sillyVoice.att = 0.01
+sillyVoice.rel = 0.1
+sillyVoice.lag = 1
+sillyVoice.gate = 1
+sillyVoice.add()
+
+combs = FileSynthDef('combs')
+combs.out=0
+combs.pan=0
+combs.amp=0.1
+combs.freq=440
+combs.gate=1
+combs.att=0.01
+combs.dec=0.1
+combs.sus=0.7
+combs.rel=0.5
+combs.rate=6
+combs.depth=0.2
+combs.regen=-3
+combs.sweep=16
+combs.rq=0.5
+combs.harmonic=1.5
+combs.add()
+
+#################
+# No andan bien #
+#################
 
 acid309 = FileSynthDef("acid309")
 acid309.gate=1
@@ -456,6 +503,11 @@ cs80lead.cbus=1
 cs80lead.add()
 
 bass8 = FileSynthDef("bass8")
+bass8.out = 0
+bass8.amp = 0.1
+bass8.gate = 1
+bass8.pan = 0
+bass8.freq = 200
 bass8.add()
 
 tubularbell = FileSynthDef("tubularBell")
@@ -519,20 +571,6 @@ oneclapThor.mix = 0.23
 oneclapThor.damp = 0.5;
 oneclapThor.add()
 
-
-acidOto3091 = FileSynthDef('acidOto3091')
-acidOto3091.out=0
-acidOto3091.gate=1
-acidOto3091.freq=440
-acidOto3091.amp=0.1
-acidOto3091.pan=0
-acidOto3091.att=0.001
-acidOto3091.dec=0.5
-acidOto3091.sus=0.1
-acidOto3091.rel=0.5
-acidOto3091.curve=-4
-acidOto3091.add()
-
 acidOto3092 = FileSynthDef('acidOto3092')
 acidOto3092.out=0
 acidOto3092.freq=440
@@ -563,35 +601,7 @@ bassWarsaw.detune=1.005
 bassWarsaw.preamp=4
 bassWarsaw.add
 
-sillyVoice = FileSynthDef('sillyVoice')
-sillyVoice.freq=220
-sillyVoice.amp=0.5
-sillyVoice.vibratoSpeed = 6
-sillyVoice.vibratoDepth = 4
-sillyVoice.vowel = 0
-sillyVoice.att = 0.01
-sillyVoice.rel = 0.1
-sillyVoice.lag = 1
-sillyVoice.gate = 1
-sillyVoice.add()
 
-combs = FileSynthDef('combs')
-combs.out=0
-combs.pan=0
-combs.amp=0.1
-combs.freq=440
-combs.gate=1
-combs.att=0.01
-combs.dec=0.1
-combs.sus=0.7
-combs.rel=0.5
-combs.rate=6
-combs.depth=0.2
-combs.regen=-3
-combs.sweep=16
-combs.rq=0.5
-combs.harmonic=1.5
-combs.add()
 
 # Get rid of the variable synth
 
