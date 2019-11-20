@@ -1,17 +1,31 @@
-FoxDot - Live Coding with Python v0.7
+FoxDot - Live Coding with Python v0.8
 =====================================
+
+## Please note
+
+I will not be actively maintaining FoxDot until January 2020 and will not be making changes to the code in response to issues / pull requests in this time. However, you can still ask questions on the [TOPLAP FoxDot Forum](https://forum.toplap.org/c/communities/foxdot) and I will get back to you when I can. Please do not ask general questions in the "issues" section. Thanks.
+
+---
 
 FoxDot is a Python programming environment that provides a fast and user-friendly abstraction to SuperCollider. It also comes with its own IDE, which means it can be used straight out of the box; all you need is Python and SuperCollider and you're ready to go!
 
-### v0.7 fixes and updates
+## Important
 
-- Add `.reload()` method for `loop` player to reload the file used, in case it has been overwritten.
-- Update `PlayerKey` class (things like `p1.degree` etc) to behave better with `map` and `transform`
-- Added `transform` method to Patterns
-- Fixed `.pyc` files showing in the tutorials menu - you may have to uninstall and reinstall to see the benefit
-- Improved in-house synchronisation between FoxDot instances.
-- Add `PDelta` pattern; user supplies the step sizes between each value.
-- Negative `offbeat` fix (thanks zdbm).
+If you are having trouble installing using `pip install FoxDot`, try updating Python's `setuptools` and `wheel` libraries using the following code and trying again.
+
+```
+pip install -U setuptools
+pip install -U wheel
+```
+
+### v0.8 Updates
+
+- Added `stretch` synth for timestretching samples, similar to `loop` but better and only plays the whole file. Stretches the audio's duration to the `sus` attribute without affecting pitch and does not require the tempo to be known.
+
+```python
+# Stretches the audio to 4 beats without affecting pitch
+p1 >> stretch("Basic_Rock_135", dur=4)
+```
 
 ---
 
@@ -159,7 +173,7 @@ bd >> play("x-o-[xx]-o(-[oo])").every([6,2], 'mirror').every(8, 'shuffle')
 
 ## Documentation
 
-[Link to documentation website](https://docs.foxdot.org/) (still in progress)
+[Link to documentation website](https://foxdot.org/docs/) (still in progress)
 
 ## Using alternative editors
 

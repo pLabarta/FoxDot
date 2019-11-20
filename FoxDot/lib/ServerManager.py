@@ -196,6 +196,7 @@ class SCLangServerManager(ServerManager):
 
         # self.myOSC = OSCClient()
         # self.myOSC.connect( ("127.0.0.1", 12345) )
+
         # Assign a valid OSC Client
         self.forward = None
 
@@ -208,6 +209,14 @@ class SCLangServerManager(ServerManager):
 
         self.fx_setup_done = False
         self.fx_names = {}
+
+        self.reset()
+
+    def reset(self):
+
+        # General SuperCollider OSC connection
+        self.client = OSCClientWrapper()
+        self.client.connect( (self.addr, self.port) )
 
         # OSC Connection for custom OSCFunc in SuperCollider
         if GET_SC_INFO:
@@ -492,7 +501,7 @@ class SCLangServerManager(ServerManager):
         effect = self.fxlist[name]
         for key in effect.args:
              data.append(key)
-             data.append(packet.get(key, effect.defaults[key]))
+             data.append(float(packet.get(key, effect.defaults[key])))
         return data
 
     def get_exit_node(self, node, bus, group_id, packet):
@@ -753,6 +762,10 @@ class SCLangServerManager(ServerManager):
         if self._is_recording:
             self.stopRecording()
         return
+
+    def add_forward(self, addr, port):
+        self.forward = OSCClientWrapper()
+        self.forward.connect( (addr, port) )
 
 try:
     
@@ -1094,8 +1107,10 @@ class TempoClient:
 
 if __name__ != "__main__":
 
-    from .Settings import ADDRESS, PORT, PORT2
+    from .Settings import ADDRESS, PORT, PORT2, FORWARD_PORT, FORWARD_ADDRESS
 
     # DefaultServer = SCLangServerManager(ADDRESS, PORT, PORT2)
     Server = SCLangServerManager(ADDRESS, PORT, PORT2)
 
+    if FORWARD_PORT and FORWARD_ADDRESS:
+        Server.add_forward(FORWARD_ADDRESS, FORWARD_PORT)

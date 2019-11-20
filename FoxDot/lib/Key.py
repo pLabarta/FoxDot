@@ -18,7 +18,8 @@ def convert_pattern_args(func):
     def new_method(self, value):
         if isinstance(value, (list, tuple)):
             value = convert_to_pattern(value)
-        if isinstance(value, (metaPattern, GeneratorPattern)):
+        # if isinstance(value, (metaPattern, GeneratorPattern)):
+        if isinstance(value, (Pattern, GeneratorPattern)):
             other_op = get_inverse_op(func.__name__)
             return getattr(value, other_op).__call__(self)
         return func(self, value)
@@ -161,32 +162,32 @@ class NumberKey(object):
 
     @convert_pattern_args
     def __eq__(self, other):
-        function = lambda value: int(value == other)
+        function = lambda value: value == other
         return self.transform(function)
     
     @convert_pattern_args
     def __ne__(self, other):
-        function = lambda value: int(value != other)
+        function = lambda value: (value != other)
         return self.transform(function)
 
     @convert_pattern_args
     def __gt__(self, other):
-        function = lambda value: int(value > other)
+        function = lambda value: (value > other)
         return self.transform(function)
 
     @convert_pattern_args
     def __ge__(self, other):
-        function = lambda value: int(value >= other)
+        function = lambda value: (value >= other)
         return self.transform(function)
 
     @convert_pattern_args
     def __lt__(self, other):
-        function = lambda value: int(value < other)
+        function = lambda value: (value < other)
         return self.transform(function)
 
     @convert_pattern_args
     def __le__(self, other):
-        function = lambda value: int(value <= other)
+        function = lambda value: (value <= other)
         return self.transform(function)
 
     def __abs__(self):
@@ -239,15 +240,21 @@ class NumberKey(object):
         functions = []
     
         # Convert default output to function
-        if not callable(default):
+        if callable(default):
+            default_func = default
+        else:
             default_func = partial(lambda x, y: x, default)
         
         # Convert input values to functions
         for key, value in mapping.items():
-            if not callable(key):
+            if callable(key):
+                test_func = force_pattern_args(key)
+            else:
                 test_func = partial(lambda x, y: x == y, key)
-                
-            if not callable(value):                
+            
+            if callable(value):
+                result_func = force_pattern_args(value)
+            else:
                 result_func = partial(lambda x, y: x, value)
                 
             functions.append((test_func, result_func))
@@ -289,16 +296,27 @@ class NumberKey(object):
     def transform(self, func):
         """ Returns a child Player Key based on the func. If the value
             returned is a PGroup, that is also transformed by the function """
+        # def new_func(item):
+        #     if isinstance(item, (PGroup, Pattern)):
+        #         return item.transform(func)
+        #     else:
+        #         return func(item)
         def new_func(item):
-            if isinstance(item, (PGroup, Pattern)):
-                return item.transform(func)
-            else:
+            try:
                 return func(item)
+            except AttributeError as e:
+                error = e
+            try:
+                return item.transform(func)
+            except AttributeError:
+                # Raise original error for more information
+                raise error
+
         return self.spawn_child(new_func)
 
-    def accompany(self, freq=0, rel=[0,2,4]):
+    def accompany(self, rel=[0,2,4]):
         """ Returns a PlayerKey whose function returns an accompanying note """
-        return self.transform(Accompany(freq=freq, rel=rel))
+        return self.transform(Accompany(rel=rel))
 
     def versus(self, rule=lambda x, y: x > y):
         """ p1 >> pads([0, 1, 2, 3])
@@ -412,9 +430,9 @@ class Accompany:
     this_last_value = 0
     keys_last_value = None
 
-    def __init__(self, freq=0, rel=[0,2,4]):
+    def __init__(self, rel=[0,2,4]):
 
-        self.frequency  = freq
+        # self.frequency  = freq
         self.scale_size = 7
         self.relations  = list(rel)
 
@@ -450,7 +468,7 @@ class Accompany:
 
             i = 2
 
-        index = indices[i]
+        index = indices[i % len(indices)]
 
         return values[index]
 

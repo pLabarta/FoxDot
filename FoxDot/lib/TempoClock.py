@@ -151,13 +151,14 @@ class TempoClock(object):
             err = "Unable to reach EspGrid. Make sure the application is running and try again."
             raise RequestTimeout(err)
         
-        self.espgrid.set_clock_mode(5)
-        self._espgrid_update_tempo(True)
+        self.espgrid.set_clock_mode(2)
+        self.schedule(lambda: self._espgrid_update_tempo(True))
+        # self._espgrid_update_tempo(True) # could schedule this for next bar?
         return
 
     def _espgrid_update_tempo(self, force=False):
         """ Retrieves the current tempo from EspGrid and updates internal values """
-        
+
         data = self.espgrid.get_tempo()
 
         # If the tempo hasn't been started, start it here and get updated data
@@ -171,7 +172,8 @@ class TempoClock(object):
             self.bpm_start_beat = data[4]
             object.__setattr__(self, "bpm", self._convert_json_bpm(data[1]))
 
-        self.schedule(self._espgrid_update_tempo)
+        # self.schedule(self._espgrid_update_tempo)
+        self.schedule(self._espgrid_update_tempo, int(self.now() + 1))
         
         return
 
@@ -248,17 +250,37 @@ class TempoClock(object):
         # self.update_network_tempo(bpm, start_beat, start_time) -- updates at the bar...
         return
 
+    def set_tempo(self, bpm, override=False):
+        """ Short-hand for update_tempo and update_tempo_now """
+        return self.update_tempo_now(bpm) if override else self.update_tempo(bpm)
+
     def update_tempo(self, bpm):
         """ Schedules the bpm change at the next bar, returns the beat and start time of the next change """
+
+        try:
+
+            assert bpm > 0, "Tempo must be a positive number"
+
+        except AssertionError as err:
+
+            raise(ValueError(err))
+
         next_bar = self.next_bar()
 
         bpm_start_time = self.get_time_at_beat(next_bar)
         bpm_start_beat = next_bar
 
         def func():
-            object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
-            self.last_now_call = self.bpm_start_time = bpm_start_time
-            self.bpm_start_beat = bpm_start_beat
+            
+            if self.espgrid is not None:
+
+                self.espgrid.set_tempo(bpm)
+
+            else:
+
+                object.__setattr__(self, "bpm", self._convert_json_bpm(bpm))
+                self.last_now_call = self.bpm_start_time = bpm_start_time
+                self.bpm_start_beat = bpm_start_beat
 
         # Give next bar value to bpm_start_beat
         self.schedule(func, next_bar, is_priority=True)
@@ -326,19 +348,27 @@ class TempoClock(object):
 
             # If connected to EspGrid, just update that
 
-            if self.espgrid is not None:
+            # if self.espgrid is not None:
 
-                self.espgrid.set_tempo(value)
+            #     self.espgrid.set_tempo(value)
 
-            else:
+            # else:
 
-                # Schedule for next bar
+            #     # Schedule for next bar
 
-                start_beat, start_time = self.update_tempo(value)
+            #     start_beat, start_time = self.update_tempo(value)
 
-                # Checks if any peers are connected and updates them also
+            #     # Checks if any peers are connected and updates them also
 
-                self.update_network_tempo(value, start_beat, start_time)
+            #     self.update_network_tempo(value, start_beat, start_time)
+
+            # Schedule for next bar
+
+            start_beat, start_time = self.update_tempo(value)
+
+            # Checks if any peers are connected and updates them also
+
+            self.update_network_tempo(value, start_beat, start_time)
 
         elif attr == "midi_nudge" and self.__setup:
 
@@ -364,6 +394,7 @@ class TempoClock(object):
 
     def beat_dur(self, n=1):
         """ Returns the length of n beats in seconds """
+
         return 0 if n == 0 else (60.0 / self.get_bpm()) * n
 
     def beats_to_seconds(self, beats):
@@ -393,7 +424,6 @@ class TempoClock(object):
 
     def get_elapsed_seconds_from_last_bpm_change(self):
         """ Returns the time since the last change in bpm """
-        # return (time.time() - self.bpm_start_time) + (float(self.nudge) + float(self.hard_nudge)) # do i need latency here?
         return self.get_time() - self.bpm_start_time
 
     def get_time(self):
@@ -402,15 +432,18 @@ class TempoClock(object):
 
     def get_time_at_beat(self, beat):
         """ Returns the time that the local computer's clock will be at 'beat' value """
-        # return time.time() + self.beat_dur(beat - self.now()) - (self.nudge + (self.hard_nudge if hard_nudge else 0))
-        return self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
+        if isinstance(self.bpm, TimeVar):
+            t = self.get_time() + self.beat_dur(beat - self.now())        
+        else:
+            t = self.bpm_start_time + self.beat_dur(beat - self.bpm_start_beat) 
+        return t
 
-    def sync_to_midi(self, sync=True):
+    def sync_to_midi(self, port=0, sync=True):
         """ If there is an available midi-in device sending MIDI Clock messages,
             this attempts to follow the tempo of the device. Requies rtmidi """
         try:
             if sync:
-                self.midi_clock = MidiIn()
+                self.midi_clock = MidiIn(port)
             elif self.midi_clock:
                 self.midi_clock.close()
                 self.midi_clock = None
@@ -539,11 +572,13 @@ class TempoClock(object):
 
             # The item might get called by another item in the queue block
 
+            output = None
+
             if item.called is False:
 
                 try:
 
-                    item.__call__()
+                    output = item.__call__()
 
                 except SystemExit:
 
@@ -552,6 +587,8 @@ class TempoClock(object):
                 except:
 
                     print(error_stack())
+
+                # TODO: Get OSC message from the call, and add to list?
 
         # Send all the message to supercollider together
 
@@ -586,9 +623,9 @@ class TempoClock(object):
 
             # If using a midi-clock, update the values
 
-            if self.midi_clock is not None:
+            # if self.midi_clock is not None:
 
-                self.midi_clock.update()
+                # self.midi_clock.update()
 
             # if using espgrid
 
@@ -897,6 +934,12 @@ class QueueBlock(object):
         """ Calls self.osc_messages() """
         self.send_osc_messages()
 
+    def append_osc_message(self, message):
+        """ Adds an OSC bundle if the timetag is not in the past """
+        if message.timetag > self.metro.get_time():
+            self.osc_messages.append(message)
+        return
+
     def send_osc_messages(self):
         """ Sends all compiled osc messages to the SuperCollider server """
         return list(map(self.server.sendOSC, self.osc_messages))
@@ -937,8 +980,9 @@ class QueueObj(object):
     def __repr__(self):
         return repr(self.obj)
     def __call__(self):
-        self.obj.__call__(*self.args, **self.kwargs)
+        value = self.obj.__call__(*self.args, **self.kwargs)
         self.called = True
+        return value
 
 class History(object):
     """
