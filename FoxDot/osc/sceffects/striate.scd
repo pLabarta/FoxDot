@@ -1,5 +1,5 @@
 SynthDef.new(\striate,
-{|bus, buf, rate, sus, striate|
+{|bus, striate, sus, buf, rate|
 var osc;
 osc = In.kr(bus, 1);
 rate = (BufDur.kr(buf) / sus);

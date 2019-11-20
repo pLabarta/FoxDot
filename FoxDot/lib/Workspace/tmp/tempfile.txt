@@ -1,3 +1,14 @@
+p6 >> glockenspiel()
+
+p6.amp = 0.01
+p6.rel = 6
+
+print(p6.rel)
+
+p5 >> sillyVoice([0,2,3,4,5],dur=4,lpf=0)
+
+print(SynthDefs)
+
 Scale.default = Scale.minor
 
 from .Extensions.VRender import vrender

@@ -426,7 +426,6 @@ waveguideFlute.gate = 1
 waveguideFlute.amp = 2
 waveguideFlute.add()
 
-
 acidOto3091 = FileSynthDef('acidOto3091')
 acidOto3091.out=0
 acidOto3091.gate=1
@@ -439,7 +438,6 @@ acidOto3091.sus=0.1
 acidOto3091.rel=0.5
 acidOto3091.curve=-4
 acidOto3091.add()
-
 
 sillyVoice = FileSynthDef('sillyVoice')
 sillyVoice.freq=220
@@ -470,10 +468,6 @@ combs.sweep=16
 combs.rq=0.5
 combs.harmonic=1.5
 combs.add()
-
-#################
-# No andan bien #
-#################
 
 acid309 = FileSynthDef("acid309")
 acid309.gate=1
@@ -509,6 +503,10 @@ bass8.gate = 1
 bass8.pan = 0
 bass8.freq = 200
 bass8.add()
+
+#################
+# No andan bien #
+#################
 
 tubularbell = FileSynthDef("tubularBell")
 tubularbell.att = 0.005
