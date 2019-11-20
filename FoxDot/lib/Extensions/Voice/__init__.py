@@ -62,6 +62,7 @@ class VoiceSynthDef(SynthDef):
         path = "/media/mathi/Personal/MyBand/2.sound/synthesis/sinsy/RealTimeSingingSynthesis_dl"
 
         if "model" in kwargs:
+            model = kwargs["model"]
             command = f"python {path}/main.py notes={notes} octave={octave} root={root} dur={durations} lang={language} file={dst_path} tempo={tempo} scale={scale} lyrics=\"{lyrics}\" model={model}"
         else:
             command = f"python {path}/main.py notes={notes} octave={octave} root={root} dur={durations} lang={language} file={dst_path} tempo={tempo} scale={scale} lyrics=\"{lyrics}\""
